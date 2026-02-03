@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mohak to Aditi (Adu)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Special+Elite&family=Rubik+Wet+Paint&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root{
+      --pink-1:#ffe6f1;
+      --pink-2:#ffb6d5;
+      --pink-3:#ff7fb8;
+      --pink-4:#ff4fa1;
+      --white:#ffffff;
+      --ink:#3b2b33;
+      --shadow: 0 18px 45px rgba(0,0,0,.18);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1100px 700px at 20% 20%, var(--pink-1), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, #fff, transparent 55%),
+        linear-gradient(135deg, var(--pink-1), #fff 40%, var(--pink-1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px 14px;
+      overflow-x:hidden;
+    }
+
+    /* Background floating hearts */
+    #hearts{
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Confetti burst hearts */
+    #burst{
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 70;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items:center;
+      justify-items:center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header{
+      text-align:center;
+      max-width: 760px;
+      padding: 6px 10px;
+    }
+    .header h1{
+      margin:0 0 6px 0;
+      font-weight: 700;
+      letter-spacing: .2px;
+      color: #7a1f4a;
+      font-size: clamp(22px, 3.4vw, 34px);
+    }
+    .header p{
+      margin:0;
+      opacity:.85;
+      line-height: 1.45;
+      font-size: 14.5px;
+    }
+
+    .stage{
+      width:min(560px, 100%);
+      display:grid;
+      place-items:center;
+      padding: 10px 0;
+      position: relative;
+    }
+
+    /* Envelope only (will fade away) */
+    .envelope{
+      width: min(520px, 92vw);
+      height: 320px;
+      position: relative;
+      cursor: pointer;
+      user-select:none;
+      transform: translateZ(0);
+      filter: drop-shadow(var(--shadow));
+      z-index: 3;
+      isolation: isolate;
+    }
+
+    .env-back{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, #fff, var(--pink-1));
+      border-radius: 18px;
+      border: 2px solid rgba(255,79,161,.25);
+      overflow:hidden;
+      z-index: 1;
+    }
+    .env-back::before{
+      content:"";
+      position:absolute;
+      inset:-40px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,79,161,.08), transparent 55%),
+        radial-gradient(circle at 80% 30%, rgba(255,182,213,.18), transparent 60%),
+        radial-gradient(circle at 55% 85%, rgba(255,79,161,.10), transparent 60%);
+      transform: rotate(-6deg);
+    }
+
+    .env-front{
+      position:absolute;
+      inset:0;
+      border-radius: 18px;
+      overflow:hidden;
+      pointer-events:none;
+      z-index: 5;
+    }
+    .env-front .left,
+    .env-front .right,
+    .env-front .bottom{
+      position:absolute;
+      width:0;height:0;
+      border-style:solid;
+      opacity:.98;
+    }
+    .env-front .left{
+      left:0; top:0;
+      border-width: 160px 0 160px 255px;
+      border-color: transparent transparent transparent rgba(255,182,213,.75);
+    }
+    .env-front .right{
+      right:0; top:0;
+      border-width: 160px 255px 160px 0;
+      border-color: transparent rgba(255,182,213,.65) transparent transparent;
+    }
+    .env-front .bottom{
+      left:0; bottom:0;
+      border-width: 0 260px 170px 260px;
+      border-color: transparent transparent rgba(255,127,184,.45) transparent;
+    }
+
+    .flap{
+      position:absolute;
+      left:0; top:0;
+      width:100%; height:100%;
+      transform-origin: top center;
+      transition: transform 900ms cubic-bezier(.2,.9,.2,1);
+      pointer-events:none;
+      z-index: 6;
+    }
+    .flap::before{
+      content:"";
+      position:absolute;
+      left:0; top:0;
+      width:0;height:0;
+      border-style:solid;
+      border-width: 170px 260px 0 260px;
+      border-color: rgba(255,127,184,.65) transparent transparent transparent;
+    }
+
+    .seal{
+      position:absolute;
+      left:50%; top: 58%;
+      transform: translate(-50%,-50%);
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffd1e6, var(--pink-4));
+      box-shadow: 0 10px 18px rgba(255,79,161,.25);
+      border: 2px solid rgba(255,255,255,.6);
+      display:grid;
+      place-items:center;
+      color:#fff;
+      transition: opacity 500ms ease;
+      z-index: 7;
+    }
+    .seal span{
+      font-family: "Special Elite", ui-monospace, monospace;
+      font-size: 14px;
+    }
+
+    .envelope.open .flap{ transform: rotateX(180deg); }
+    .envelope.open .seal{ opacity: 0; }
+
+    /* Envelope fade away (ONLY envelope now, not the letter) */
+    .envelope.fade-away{
+      animation: envFade 900ms ease forwards;
+    }
+    @keyframes envFade{
+      to{
+        opacity: 0;
+        transform: translateY(45px) scale(.96);
+        filter: drop-shadow(0 6px 14px rgba(0,0,0,.08));
+        pointer-events: none;
+      }
+    }
+
+    /* LETTER is separate from envelope so it doesn't fade */
+    .letter-floating{
+      position: absolute;
+      left: 50%;
+      top: 40px;
+      transform: translateX(-50%) translateY(190px) scale(.96);
+      width: min(430px, 84%);
+      height: 270px;
+      background: linear-gradient(180deg, #fff, #fff7fb);
+      border-radius: 14px;
+      border: 2px solid rgba(255,79,161,.18);
+      box-shadow: 0 16px 35px rgba(0,0,0,.12);
+      padding: 14px 16px;
+      opacity: 0;
+      overflow:hidden;
+      z-index: 20;
+      transition: transform 1200ms cubic-bezier(.18,.95,.2,1), opacity 600ms ease;
+    }
+    .letter-floating::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(transparent 0, transparent 21px, rgba(255,79,161,.08) 22px, transparent 23px),
+        linear-gradient(90deg, rgba(255,79,161,.06), transparent 18%);
+      background-size: 100% 24px, 100% 100%;
+      pointer-events:none;
+      opacity:.55;
+    }
+
+    .letter-inner{
+      position: relative;
+      height: 100%;
+      display:grid;
+      grid-template-columns: 1fr 160px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .note{
+      padding: 2px 4px;
+      overflow:auto;
+    }
+    .note h2{
+      margin: 6px 0 10px 0;
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+      font-size: 34px;
+      color: #7a1f4a;
+    }
+    .typed{
+      font-family: "Special Elite", ui-monospace, monospace;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #3a2a32;
+      white-space: pre-wrap;
+    }
+    .cursor{
+      display: inline-block;
+      width: 10px;
+      transform: translateY(1px);
+      animation: blink 1s steps(2, end) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .sig{
+      margin-top: 12px;
+      font-family: "Great Vibes", cursive;
+      font-size: 26px;
+      color: #7a1f4a;
+    }
+
+    .photo{
+      border-radius: 12px;
+      border: 2px dashed rgba(255,79,161,.35);
+      background: radial-gradient(circle at 30% 20%, rgba(255,182,213,.35), transparent 55%),
+                  linear-gradient(180deg, #fff, #fff0f7);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .photo img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      border-radius: 10px;
+      display:none;
+    }
+
+    /* Open letter */
+    .letter-floating.open{
+      transform: translateX(-50%) translateY(-130px) scale(1);
+      opacity: 1;
+    }
+
+    .tap{
+      margin-top: 10px;
+      font-size: 13px;
+      opacity:.8;
+      text-align:center;
+    }
+    .footer{
+      text-align:center;
+      opacity:.75;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* Popup modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      background: rgba(255, 235, 245, .72);
+      backdrop-filter: blur(7px);
+      display:grid;
+      place-items:center;
+      z-index: 50;
+      padding: 18px;
+    }
+    .modal.hidden{ display:none; }
+    .modal-card{
+      width: min(680px, 92vw);
+      background: rgba(255,255,255,.9);
+      border: 2px solid rgba(255,79,161,.25);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px 18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .graffiti{
+      position:relative;
+      font-family: "Rubik Wet Paint", system-ui, sans-serif;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.05;
+      color: #ff2d8f;
+      text-align:center;
+      text-shadow: 0 2px 0 #ffffff, 0 6px 22px rgba(255,45,143,.28);
+      margin: 10px 0 6px 0;
+      letter-spacing: .6px;
+    }
+    .modal-sub{
+      position:relative;
+      text-align:center;
+      margin: 0;
+      font-size: 14px;
+      opacity:.85;
+      color:#6a2341;
+    }
+    .dismiss{
+      position:relative;
+      margin-top: 14px;
+      text-align:center;
+      font-size: 12.5px;
+      opacity:.75;
+    }
+
+    /* Music pill */
+    .music-pill{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 60;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.85);
+      border: 2px solid rgba(255,79,161,.22);
+      box-shadow: 0 10px 22px rgba(0,0,0,.10);
+      color:#6a2341;
+      font-size: 13px;
+      user-select:none;
+    }
+    .music-pill button{
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: linear-gradient(180deg, #fff, #fff0f7);
+      border: 1px solid rgba(255,79,161,.25);
+      color:#7a1f4a;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .music-pill button:active{ transform: translateY(1px); }
+
+    @media (prefers-reduced-motion: reduce){
+      .flap, .letter-floating{ transition: none; }
+      .cursor{ animation: none; }
+      .envelope.fade-away{ animation: none; opacity: 0; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="hearts" aria-hidden="true"></canvas>
+  <canvas id="burst" aria-hidden="true"></canvas>
+
+  <div class="modal" id="modal" aria-label="Valentine question overlay">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="q">
+      <div class="graffiti" id="q">I LOVE YOU ADUU</div>
+      <p class="modal-sub">From <strong>Mohak</strong> to <strong>Aditi (Adu)</strong></p>
+      <div class="dismiss">Tap anywhere to continue</div>
+    </div>
+  </div>
+
+  <div class="music-pill" id="musicPill" aria-label="Music controls">
+    <button id="musicBtn" type="button">Play music</button>
+    <span id="musicStatus">Muted until you tap</span>
+  </div>
+
+  <main class="wrap">
+    <header class="header">
+      <h1>For Adu, my baccha</h1>
+      <p>Tap the envelope to open your letter.</p>
+    </header>
+
+    <section class="stage">
+      <!-- Envelope (will fade away) -->
+      <div class="envelope" id="envelope" aria-label="Envelope (tap to open)">
+        <div class="env-back"></div>
+        <div class="flap" aria-hidden="true"></div>
+
+        <div class="env-front" aria-hidden="true">
+          <div class="left"></div>
+          <div class="right"></div>
+          <div class="bottom"></div>
+        </div>
+
+        <div class="seal" aria-hidden="true"><span>To Adu</span></div>
+      </div>
+
+      <!-- Letter (separate, will stay) -->
+      <div class="letter-floating" id="letterCard" aria-label="Letter">
+        <div class="letter-inner">
+          <div class="note">
+            <h2>My Adu, my baccha</h2>
+
+            <div class="typed" id="typed"></div>
+            <span class="cursor" id="cursor">|</span>
+
+            <div class="sig" id="signature" style="display:none;">Yours, Mohak</div>
+          </div>
+
+          <div class="photo" aria-label="Photo">
+            <img id="couplePhoto" alt="Mohak and Aditi photo" />
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="footer">Made with love, from Mohak.</div>
+    </section>
+  </main>
+
+  <audio id="bgm" loop preload="auto">
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    (function () {
+      const envelope = document.getElementById("envelope");
+      const letterCard = document.getElementById("letterCard");
+      const modal = document.getElementById("modal");
+
+      const bgm = document.getElementById("bgm");
+      const musicBtn = document.getElementById("musicBtn");
+      const musicStatus = document.getElementById("musicStatus");
+
+      const typedEl = document.getElementById("typed");
+      const cursorEl = document.getElementById("cursor");
+      const signatureEl = document.getElementById("signature");
+
+      let typingStarted = false;
+      let openedOnce = false;
+
+      const letterText =
+`Aduu, I found you when I wasn't looking for anytning else.
+I wish I could have stayed in India for a bit longer. I know I am 8000 miles away but I know for sure that we will overcome the distance.
+I am not allowed to send you gifts right now, but see one day I will take you from your house wit full permission of your parents.
+
+So here's a promise, we will always hold our hands through every thick and thin. This will be our first Valentine's and we will have alot more to come. I love you my baccha. And always remember that I am always and forever yours!!!
+
+
+Will you be my Valentine's ? You dont have any option. It's a "YES"!!!!`;
+
+      function tryAutoplayMusic() {
+        bgm.volume = 0.22;
+        const p = bgm.play();
+        if (p && typeof p.then === "function") {
+          p.then(() => {
+            musicStatus.textContent = "Playing";
+            musicBtn.textContent = "Pause music";
+          }).catch(() => {
+            musicStatus.textContent = "Muted until you tap";
+            musicBtn.textContent = "Play music";
+          });
+        }
+      }
+
+      function toggleMusic() {
+        if (bgm.paused) {
+          bgm.volume = 0.22;
+          bgm.play().then(() => {
+            musicStatus.textContent = "Playing";
+            musicBtn.textContent = "Pause music";
+          }).catch(() => {
+            musicStatus.textContent = "Tap again to allow audio";
+          });
+        } else {
+          bgm.pause();
+          musicStatus.textContent = "Paused";
+          musicBtn.textContent = "Play music";
+        }
+      }
+
+      musicBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMusic();
+      });
+
+      function typewriter(text, speedMs) {
+        typingStarted = true;
+        typedEl.textContent = "";
+        signatureEl.style.display = "none";
+        cursorEl.style.display = "inline-block";
+
+        let i = 0;
+        const tick = () => {
+          if (i >= text.length) {
+            cursorEl.style.display = "none";
+            signatureEl.style.display = "block";
+            return;
+          }
+          typedEl.textContent += text.charAt(i);
+          i += 1;
+          const jitter = Math.floor(Math.random() * 18);
+          setTimeout(tick, speedMs + jitter);
+        };
+        tick();
+      }
+
+      modal.addEventListener("click", () => {
+        modal.classList.add("hidden");
+        tryAutoplayMusic();
+      });
+
+      // Load your photo
+      const img = document.getElementById("couplePhoto");
+      img.onload = () => { img.style.display = "block"; };
+      img.onerror = () => { img.style.display = "none"; };
+      img.src = "us.png";
+
+      // Hearts background canvas
+      const heartsCanvas = document.getElementById("hearts");
+      const hctx = heartsCanvas.getContext("2d", { alpha: true });
+
+      // Burst canvas
+      const burstCanvas = document.getElementById("burst");
+      const bctx = burstCanvas.getContext("2d", { alpha: true });
+
+      function resizeCanvas(c, ctx) {
+        const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        c.width = Math.floor(window.innerWidth * dpr);
+        c.height = Math.floor(window.innerHeight * dpr);
+        c.style.width = "100%";
+        c.style.height = "100%";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function rand(min, max) { return Math.random() * (max - min) + min; }
+
+      resizeCanvas(heartsCanvas, hctx);
+      resizeCanvas(burstCanvas, bctx);
+      window.addEventListener("resize", () => {
+        resizeCanvas(heartsCanvas, hctx);
+        resizeCanvas(burstCanvas, bctx);
+      });
+
+      // Heart drawing helper
+      function drawHeart(ctx, x, y, s, rot, a) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+        ctx.globalAlpha = a;
+
+        ctx.beginPath();
+        const k = s / 16;
+        ctx.moveTo(0, -6 * k);
+        ctx.bezierCurveTo(7 * k, -14 * k, 18 * k, -2 * k, 0, 12 * k);
+        ctx.bezierCurveTo(-18 * k, -2 * k, -7 * k, -14 * k, 0, -6 * k);
+        ctx.closePath();
+
+        const g = ctx.createLinearGradient(-s, -s, s, s);
+        g.addColorStop(0, "rgba(255,79,161,1)");
+        g.addColorStop(1, "rgba(255,182,213,1)");
+        ctx.fillStyle = g;
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Floating hearts
+      const hearts = [];
+      const MAX_HEARTS = 36;
+
+      function makeHeart() {
+        const size = rand(10, 22);
+        return {
+          x: rand(0, window.innerWidth),
+          y: window.innerHeight + rand(0, 200),
+          size,
+          speed: rand(0.35, 0.9),
+          drift: rand(-0.35, 0.35),
+          wobble: rand(0, Math.PI * 2),
+          wobbleSpeed: rand(0.008, 0.02),
+          alpha: rand(0.22, 0.55),
+          rotation: rand(-0.6, 0.6),
+          rotSpeed: rand(-0.008, 0.008)
+        };
+      }
+      for (let i = 0; i < MAX_HEARTS; i++) hearts.push(makeHeart());
+
+      function animateHearts() {
+        hctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        for (const h of hearts) {
+          h.wobble += h.wobbleSpeed;
+          h.rotation += h.rotSpeed;
+
+          const wob = Math.sin(h.wobble) * 6;
+          h.x += h.drift + wob * 0.03;
+          h.y -= h.speed;
+
+          drawHeart(hctx, h.x + wob, h.y, h.size, h.rotation, h.alpha);
+
+          if (h.y < -60) {
+            Object.assign(h, makeHeart());
+            h.y = window.innerHeight + rand(40, 220);
+          }
+        }
+        requestAnimationFrame(animateHearts);
+      }
+      animateHearts();
+
+      // Confetti burst hearts
+      const burstParticles = [];
+      let burstRunning = false;
+
+      function makeBurstParticle(cx, cy) {
+        const size = rand(10, 18);
+        return {
+          x: cx + rand(-10, 10),
+          y: cy + rand(-10, 10),
+          vx: rand(-5.2, 5.2),
+          vy: rand(-8.5, -3.2),
+          g: rand(0.14, 0.22),
+          size,
+          rot: rand(-1.2, 1.2),
+          vr: rand(-0.12, 0.12),
+          life: 0,
+          ttl: rand(55, 85),
+          alpha: rand(0.75, 1.0)
+        };
+      }
+
+      function startBurstAt(x, y) {
+        for (let i = 0; i < 46; i++) burstParticles.push(makeBurstParticle(x, y));
+        if (!burstRunning) {
+          burstRunning = true;
+          animateBurst();
+        }
+      }
+
+      function animateBurst() {
+        bctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        for (let i = burstParticles.length - 1; i >= 0; i--) {
+          const p = burstParticles[i];
+          p.life += 1;
+
+          p.vy += p.g;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          const t = p.life / p.ttl;
+          const a = p.alpha * (1 - t);
+          drawHeart(bctx, p.x, p.y, p.size, p.rot, Math.max(0, a));
+
+          if (p.life >= p.ttl) burstParticles.splice(i, 1);
+        }
+
+        if (burstParticles.length > 0) {
+          requestAnimationFrame(animateBurst);
+        } else {
+          burstRunning = false;
+          bctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+      }
+
+      // One-time open action
+      envelope.addEventListener("click", () => {
+        tryAutoplayMusic();
+        if (openedOnce) return;
+        openedOnce = true;
+
+        envelope.classList.add("open");
+        letterCard.classList.add("open");
+
+        // Burst from envelope center
+        const rect = envelope.getBoundingClientRect();
+        startBurstAt(rect.left + rect.width/2, rect.top + rect.height/2);
+
+        // Typewriter after slide begins
+        if (!typingStarted) setTimeout(() => typewriter(letterText, 22), 550);
+
+        // Fade envelope away AFTER the letter is out
+        setTimeout(() => {
+          envelope.classList.add("fade-away");
+        }, 1400);
+      });
+    })();
+  </script>
+</body>
+</html>
